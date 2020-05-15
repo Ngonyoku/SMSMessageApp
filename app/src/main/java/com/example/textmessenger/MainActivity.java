@@ -3,6 +3,8 @@ package com.example.textmessenger;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.ContentResolver;
@@ -20,13 +22,17 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    ArrayAdapter adapter;
-    ArrayList<String> messageList = new ArrayList<>();
+    //    ArrayAdapter adapter;
+//    ArrayList<String> messageList = new ArrayList<>();
+    private RecyclerView messageRecycler;
+    private MessageRVAdapter messagesAdapter;
+    private List<MessagesModel> messageList;
     SmsManager smsManager = SmsManager.getDefault();
-    ListView messageView;
-    EditText messageInput;
+    //    ListView messageView;
+    private EditText messageInput;
     private static final int READ_SMS_PERMISSION = 1;
 
     public static MainActivity inst;
@@ -49,9 +55,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         messageInput = findViewById(R.id.message_input);
-        messageView = findViewById(R.id.message_view);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messageList);
-        messageView.setAdapter(adapter);
+        messageRecycler = findViewById(R.id.message_view_recycler);
+        messageList = new ArrayList<>();
+        messagesAdapter = new MessageRVAdapter(this, messageList);
+
+        messageRecycler.setLayoutManager(new LinearLayoutManager(this));
+        messageRecycler.setAdapter(messagesAdapter);
+
+//        messageView = findViewById(R.id.message_view);
+//        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messageList);
+//        messageView.setAdapter(adapter);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -62,8 +75,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateInbox(String smsMessage) {
-        adapter.insert(smsMessage, 0);
-        adapter.notifyDataSetChanged();
+//        adapter.insert(smsMessage, 0);
+//        adapter.notifyDataSetChanged();
+        messagesAdapter.notifyItemInserted(0);
     }
 
     void displayMessage() {
@@ -75,17 +89,19 @@ public class MainActivity extends AppCompatActivity {
         int sender = smsCursor.getColumnIndex("address");
 
         if (smsBody < 0 || !smsCursor.moveToFirst()) return;
-        adapter.clear();
+//        adapter.clear();
+        messageList.clear();
         do {
 
-            String smsContent = "FROM: "
-                    + smsCursor.getString(sender)
-                    + "\n"
-                    + smsCursor.getString(smsBody)
-                    + "\n";
+//            String smsContent = "FROM: "
+//                    + smsCursor.getString(sender)
+//                    + "\n"
+//                    + smsCursor.getString(smsBody)
+//                    + "\n";
 
             if (smsCursor.getString(sender).equals("MPESA")) {
-                adapter.add(smsContent);
+//                adapter.add(smsContent);
+                messageList.add(new MessagesModel(smsCursor.getString(sender), smsCursor.getString(smsBody)));
             }
 
         } while (smsCursor.moveToNext());
