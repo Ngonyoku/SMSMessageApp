@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int READ_SMS_PERMISSION = 1;
 
     public static MainActivity inst;
+    public static boolean active = false;
 
     public static MainActivity instance() {
         return inst;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         inst = this;
+        active = true;
     }
 
     @Override
@@ -73,15 +76,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (smsBody < 0 || !smsCursor.moveToFirst()) return;
         adapter.clear();
-
         do {
+
             String smsContent = "FROM: "
                     + smsCursor.getString(sender)
                     + "\n"
                     + smsCursor.getString(smsBody)
                     + "\n";
 
-            adapter.add(smsContent);
+            if (smsCursor.getString(sender).equals("MPESA")) {
+                adapter.add(smsContent);
+            }
+
         } while (smsCursor.moveToNext());
     }
 
@@ -124,5 +130,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        active = false;
     }
 }

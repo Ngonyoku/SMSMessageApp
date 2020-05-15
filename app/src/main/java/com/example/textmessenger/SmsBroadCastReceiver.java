@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import android.widget.Toast;
 
 import java.util.Objects;
 
@@ -32,9 +33,16 @@ public class SmsBroadCastReceiver extends BroadcastReceiver {
                     messageStr += smsBody + "\n";
                 }
             }
+            Toast.makeText(context, "Message Received", Toast.LENGTH_SHORT).show();
+            if (MainActivity.active) {
+                MainActivity inst = MainActivity.instance();
+                inst.updateInbox(messageStr);
+            } else {
+                Intent intent2 = new Intent(context, MainActivity.class);
+                intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent2);
+            }
 
-            MainActivity inst = MainActivity.instance();
-            inst.updateInbox(messageStr);
         }
     }
 }
